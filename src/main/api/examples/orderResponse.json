@@ -1,0 +1,29 @@
+{
+  "orderID": 12345,
+  "orderLines": 2,
+  "orderItemsIn": [
+    {
+      "item": "ITEM1",
+      "qty": 123.45,
+      "price": 321.45
+    },
+    {
+      "item": "ITEM2",
+      "qty": 234.45,
+      "price": 987.45
+    }
+  ],
+    "orderItemsOut": [
+    {
+      "item": "ITEM1",
+      "qty": 123.45,
+      "price": 321.45
+    },
+    {
+      "item": "ITEM2",
+      "qty": 234.45,
+      "price": 987.45
+    }
+  ]
+  
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:as400="http://www.mulesoft.org/schema/mule/as400" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.mulesoft.org/schema/mule/as400 http://www.mulesoft.org/schema/mule/as400/current/mule-as400.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration" />
+    <apikit:config name="api-config" raml="api.raml" consoleEnabled="false" doc:name="Router" />
+    <as400:config name="AS400__AS400_Connector_Configuration" endpoint="${ibmi.url}" userid="${ibmi.user}" password="${ibmi.password}" libraryList="${ibmi.libl}" doc:name="AS400: AS400 Connector Configuration" />
+    <flow name="api-main">
+        <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP" />
+        <apikit:router config-ref="api-config" doc:name="APIkit Router" />
+        <exception-strategy ref="api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy" />
+    </flow>
+    <flow name="api-console">
+        <http:listener config-ref="api-httpListenerConfig" path="/console/*" doc:name="HTTP" />
+        <apikit:console config-ref="api-config" doc:name="APIkit Console" />
+    </flow>
+    <flow name="post:/orders:application/json:api-config">
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+--- 
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <as400:program-call-processor config-ref="AS400__AS400_Connector_Configuration" doc:name="AS400" programLibrary="MULEDEMOS" programName="postorders">
+            <as400:parameters>
+                <as400:parameter name="orderID" dataType="PACKED" length="8" usage="INOUT" parmValue-ref="#[payload.orderID]" />
+                <as400:parameter name="orderLines" dataType="PACKED" length="4" usage="INOUT" parmValue-ref="#[payload.orderLines]" />
+                <as400:parameter name="orderLinesIn" dataType="STRUCTURE" usage="INOUT" count="10" parmValue-ref="#[payload.orderItemsIn]">
+                    <as400:data-structure-elements>
+                        <as400:data-structure-element name="item" dataType="STRING" length="35" />
+                        <as400:data-structure-element name="qty" dataType="PACKED" length="11" decimalPositions="3" />
+                        <as400:data-structure-element name="price" dataType="PACKED" length="14" decimalPositions="4" />
+                    </as400:data-structure-elements>
+                </as400:parameter>
+                <as400:parameter name="orderLinesOut" dataType="STRUCTURE" usage="OUT" count="10">
+                    <as400:data-structure-elements>
+                        <as400:data-structure-element name="item" dataType="STRING" length="35" />
+                        <as400:data-structure-element name="qty" dataType="PACKED" length="11" decimalPositions="3" />
+                        <as400:data-structure-element name="price" dataType="PACKED" length="14" decimalPositions="4" />
+                    </as400:data-structure-elements>
+                </as400:parameter>
+            </as400:parameters>
+        </as400:program-call-processor>
+
+    </flow>
+    <apikit:mapping-exception-strategy name="api-apiKitGlobalExceptionMapping">
+        <apikit:mapping statusCode="404">
+            <apikit:exception value="org.mule.module.apikit.exception.NotFoundException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Resource not found&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="405">
+            <apikit:exception value="org.mule.module.apikit.exception.MethodNotAllowedException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Method not allowed&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="415">
+            <apikit:exception value="org.mule.module.apikit.exception.UnsupportedMediaTypeException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Unsupported media type&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="406">
+            <apikit:exception value="org.mule.module.apikit.exception.NotAcceptableException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Not acceptable&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="400">
+            <apikit:exception value="org.mule.module.apikit.exception.BadRequestException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Bad request&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+    </apikit:mapping-exception-strategy>
+</mule>

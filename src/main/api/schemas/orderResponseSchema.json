@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#", 
+  "definitions": {}, 
+  "id": "http://example.com/example.json", 
+  "properties": {
+    "orderID": {
+      "default": 12345, 
+      "description": "An explanation about the purpose of this instance.", 
+      "id": "/properties/orderID", 
+      "title": "The orderid schema", 
+      "type": "integer"
+    }, 
+    "orderItemsIn": {
+      "id": "/properties/orderItemsIn", 
+      "items": {
+        "id": "/properties/orderItemsIn/items", 
+        "properties": {
+          "item": {
+            "default": "ITEM1", 
+            "description": "An explanation about the purpose of this instance.", 
+            "id": "/properties/orderItemsIn/items/properties/item", 
+            "title": "The item schema", 
+            "type": "string"
+          }, 
+          "price": {
+            "default": 321.44999999999999, 
+            "description": "An explanation about the purpose of this instance.", 
+            "id": "/properties/orderItemsIn/items/properties/price", 
+            "title": "The price schema", 
+            "type": "number"
+          }, 
+          "qty": {
+            "default": 123.45, 
+            "description": "An explanation about the purpose of this instance.", 
+            "id": "/properties/orderItemsIn/items/properties/qty", 
+            "title": "The qty schema", 
+            "type": "number"
+          }
+        }, 
+        "type": "object"
+      }, 
+      "type": "array"
+    }, 
+    "orderItemsOut": {
+      "id": "/properties/orderItemsOut", 
+      "items": {
+        "id": "/properties/orderItemsOut/items", 
+        "properties": {
+          "item": {
+            "default": "ITEM1", 
+            "description": "An explanation about the purpose of this instance.", 
+            "id": "/properties/orderItemsOut/items/properties/item", 
+            "title": "The item schema", 
+            "type": "string"
+          }, 
+          "price": {
+            "default": 321.44999999999999, 
+            "description": "An explanation about the purpose of this instance.", 
+            "id": "/properties/orderItemsOut/items/properties/price", 
+            "title": "The price schema", 
+            "type": "number"
+          }, 
+          "qty": {
+            "default": 123.45, 
+            "description": "An explanation about the purpose of this instance.", 
+            "id": "/properties/orderItemsOut/items/properties/qty", 
+            "title": "The qty schema", 
+            "type": "number"
+          }
+        }, 
+        "type": "object"
+      }, 
+      "type": "array"
+    }, 
+    "orderLines": {
+      "default": 2, 
+      "description": "An explanation about the purpose of this instance.", 
+      "id": "/properties/orderLines", 
+      "title": "The orderlines schema", 
+      "type": "integer"
+    }
+  }, 
+  "type": "object"
+}
